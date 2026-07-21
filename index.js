@@ -9,11 +9,9 @@ const {
 
 const axios = require("axios");
 
-const {
-    token,
-    guildId,
-    roverApiKey
-} = require("./config.json");
+const token = process.env.DISCORD_TOKEN;
+const guildId = process.env.GUILD_ID;
+const roverApiKey = process.env.ROVER_API_KEY;
 
 // RoVer Verified 역할 ID
 const VERIFIED_ROLE_ID = "1528618176739414089";
