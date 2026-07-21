@@ -7,7 +7,7 @@ const {
     GatewayIntentBits
 } = require("discord.js");
 
-const axios = require("axios");
+require("dotenv").config();
 
 const token = process.env.DISCORD_TOKEN;
 const guildId = process.env.GUILD_ID;
@@ -121,4 +121,7 @@ client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
 // ==========================================
 // 봇 로그인
 // ==========================================
+console.log("token =", token);
+console.log("type =", typeof token);
+
 client.login(token);
