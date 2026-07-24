@@ -69,9 +69,7 @@ client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
     }
 
     const currentName = newMember.displayName;
-
     const baseName = currentName.replace(/\s*\[[^\]]+\]$/, "");
-
     const nickname = `${baseName} [${robloxName}]`;
 
     console.log("현재 닉네임:", currentName);
@@ -83,16 +81,11 @@ client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
     }
 
     try {
-
         await newMember.setNickname(nickname);
-
         console.log("닉네임 변경 성공");
-
     } catch (err) {
-
         console.error("닉네임 변경 실패");
         console.error(err);
-
     }
 
 });
@@ -132,7 +125,6 @@ async function getRobloxUsername(discordId) {
 
         return null;
     }
-
 }
 
 // ==========================================
@@ -143,10 +135,12 @@ client.on(Events.MessageCreate, async (message) => {
     // 봇 메시지는 무시
     if (message.author.bot) return;
 
-    // "테토"라고 입력하면 답장
+    // "테토"
     if (message.content.toLowerCase() === "테토") {
         await message.reply("테토!");
-        
+    }
+
+    // "태토"
     if (message.content.toLowerCase() === "태토") {
         await message.reply("태토?");
     }
