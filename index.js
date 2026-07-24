@@ -33,6 +33,11 @@ const client = new Client({
 });
 
 // ==========================================
+// 테토 연속 횟수 저장
+// ==========================================
+const tetoCount = new Map();
+
+// ==========================================
 // 로그인 완료
 // ==========================================
 client.once(Events.ClientReady, () => {
@@ -132,21 +137,53 @@ async function getRobloxUsername(discordId) {
 // ==========================================
 client.on(Events.MessageCreate, async (message) => {
 
-    // 봇 메시지는 무시
     if (message.author.bot) return;
 
-    // "테토"
-    if (message.content.toLowerCase() === "테토") {
-        await message.reply("테토!");
+    const userId = message.author.id;
+    const text = message.content.trim().toLowerCase();
+
+    if (text === "테토") {
+
+        let count = tetoCount.get(userId) || 0;
+        count++;
+
+        tetoCount.set(userId, count);
+
+        if (count >= 3) {
+
+            const specialMessages = [
+                "테토테토테토!",
+                "Teto!",
+                "테토다요!",
+                "테토리스!",
+                "테토x3"
+            ];
+
+            const random =
+                specialMessages[Math.floor(Math.random() * specialMessages.length)];
+
+            await message.reply(random);
+
+            tetoCount.set(userId, 0);
+
+        } else {
+
+            await message.reply("테토!");
+
+        }
+
+        return;
     }
 
-    // "태토"
-    if (message.content.toLowerCase() === "태토") {
+    if (text === "태토") {
         await message.reply("태토?");
+        return;
     }
+
+    // 다른 말을 하면 연속 횟수 초기화
+    tetoCount.delete(userId);
 
 });
-
 // ==========================================
 // 로그인
 // ==========================================
