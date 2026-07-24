@@ -146,6 +146,9 @@ client.on(Events.MessageCreate, async (message) => {
     // "테토"라고 입력하면 답장
     if (message.content.toLowerCase() === "테토") {
         await message.reply("테토!");
+        
+    if (message.content.toLowerCase() === "태토") {
+        await message.reply("태토?");
     }
 
 });
