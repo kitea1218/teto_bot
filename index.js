@@ -133,7 +133,7 @@ async function getRobloxUsername(discordId) {
         return null;
     }
 
-});
+}
 
 // ==========================================
 // 채팅 답장
