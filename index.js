@@ -33,9 +33,10 @@ const client = new Client({
 });
 
 // ==========================================
-// 테토 연속 횟수 저장
+// 테토 연속 상태
 // ==========================================
-const tetoCount = new Map();
+let currentUser = null;
+let tetoCount = 0;
 
 // ==========================================
 // 로그인 완료
@@ -133,23 +134,41 @@ async function getRobloxUsername(discordId) {
 }
 
 // ==========================================
+// 현재 테토 연속 사용자
+// ==========================================
+let currentUser = null;
+let tetoCount = 0;
+
+// ==========================================
 // 채팅 답장
 // ==========================================
 client.on(Events.MessageCreate, async (message) => {
 
     if (message.author.bot) return;
 
-    const userId = message.author.id;
     const text = message.content.trim().toLowerCase();
 
+    // ==========================
+    // 테토
+    // ==========================
     if (text === "테토") {
 
-        let count = tetoCount.get(userId) || 0;
-        count++;
+        // 처음 시작
+        if (currentUser === null) {
+            currentUser = message.author.id;
+            tetoCount = 1;
+        }
+        // 같은 사람이 계속 입력
+        else if (currentUser === message.author.id) {
+            tetoCount++;
+        }
+        // 다른 사람이 테토 입력 → 이전 사람 초기화 후 새로 시작
+        else {
+            currentUser = message.author.id;
+            tetoCount = 1;
+        }
 
-        tetoCount.set(userId, count);
-
-        if (count >= 3) {
+        if (tetoCount >= 3) {
 
             const specialMessages = [
                 "테토테토테토!",
@@ -164,7 +183,9 @@ client.on(Events.MessageCreate, async (message) => {
 
             await message.reply(random);
 
-            tetoCount.set(userId, 0);
+            // 초기화
+            currentUser = null;
+            tetoCount = 0;
 
         } else {
 
@@ -175,13 +196,22 @@ client.on(Events.MessageCreate, async (message) => {
         return;
     }
 
+    // ==========================
+    // 태토
+    // ==========================
     if (text === "태토") {
+        currentUser = null;
+        tetoCount = 0;
+
         await message.reply("태토?");
         return;
     }
 
-    // 다른 말을 하면 연속 횟수 초기화
-    tetoCount.delete(userId);
+    // ==========================
+    // 다른 사람이 아무 말이나 하면 초기화
+    // ==========================
+    currentUser = null;
+    tetoCount = 0;
 
 });
 // ==========================================
