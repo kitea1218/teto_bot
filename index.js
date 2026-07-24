@@ -27,6 +27,8 @@ const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
     ]
 });
 
@@ -131,7 +133,22 @@ async function getRobloxUsername(discordId) {
         return null;
     }
 
-}
+});
+
+// ==========================================
+// 채팅 답장
+// ==========================================
+client.on(Events.MessageCreate, async (message) => {
+
+    // 봇 메시지는 무시
+    if (message.author.bot) return;
+
+    // "테토"라고 입력하면 답장
+    if (message.content.toLowerCase() === "테토") {
+        await message.reply("테토!");
+    }
+
+});
 
 // ==========================================
 // 로그인
