@@ -28,9 +28,11 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildInvites
     ]
 });
+
 
 // ==========================================
 // 로그인 완료
@@ -100,13 +102,13 @@ async function getRobloxUsername(discordId) {
     try {
 
         const response = await axios.get(
-            `https://registry.rover.link/api/guilds/${guildId}/discord-to-roblox/${discordId}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${roverApiKey}`
-                }
-            }
-        );
+    `https://registry.rover.link/api/guilds/${guildId}/discord-to-roblox/${discordId}`,
+    {
+        headers: {
+            Authorization: `Bearer ${roverApiKey}`
+        }
+    }
+);
 
         console.log("RoVer 응답:", response.data);
 
@@ -128,6 +130,7 @@ async function getRobloxUsername(discordId) {
 }
 
 // ==========================================
+<<<<<<< HEAD
 // 현재 테토 연속 사용자
 // ==========================================
 let currentUser = null;
@@ -209,6 +212,14 @@ client.on(Events.MessageCreate, async (message) => {
 
 });
 // ==========================================
+=======
+// 입퇴장 알림 기능
+// ==========================================
+const setupJoinLeave = require("./joinLeave");
+setupJoinLeave(client);
+
+// ==========================================
+>>>>>>> 952465d (입퇴장 시스템 추가)
 // 로그인
 // ==========================================
 console.log("Token:", token ? "OK" : "없음");
