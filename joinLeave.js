@@ -151,9 +151,9 @@ module.exports = function setupJoinLeave(client) {
 
       // 입장 임베드 생성
       const embed = new EmbedBuilder()
-        .setColor(0x3498db)
+        .setColor(FFFFFF)
         .setTitle(
-          `${guild.memberCount}번째 멤버가 입장했어요`
+          `✦${guild.memberCount}번째 멤버가 입장했어요✦`
         )
         .setThumbnail(
           member.user.displayAvatarURL({
@@ -222,7 +222,7 @@ module.exports = function setupJoinLeave(client) {
 
       // 퇴장 임베드 생성
       const embed = new EmbedBuilder()
-        .setColor(0xe74c3c)
+        .setColor(FF0000)
         .setTitle('멤버가 퇴장했어요')
         .setThumbnail(
           member.user.displayAvatarURL({
