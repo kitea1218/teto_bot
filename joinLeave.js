@@ -193,7 +193,6 @@ module.exports = function setupJoinLeave(client) {
 
       // 알림 전송
       await channel.send({
-        content: `<@${member.id}>`,
         embeds: [embed],
         allowedMentions: {
           users: [member.id]
@@ -257,7 +256,6 @@ module.exports = function setupJoinLeave(client) {
 
       // 퇴장 알림 전송
       await channel.send({
-        content: `<@${member.id}>`,
         embeds: [embed],
         allowedMentions: {
           parse: []
