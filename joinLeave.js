@@ -193,7 +193,7 @@ module.exports = function setupJoinLeave(client) {
 
       // 알림 전송
       await channel.send({
-        content: `환영합니다! <@${member.id}>`,
+        content: `<@${member.id}>`,
         embeds: [embed],
         allowedMentions: {
           users: [member.id]
