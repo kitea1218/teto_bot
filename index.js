@@ -10,7 +10,6 @@ const guildConfig = require("./guildConfig.json");
 require("dotenv").config();
 
 const token = process.env.DISCORD_TOKEN;
-const roverApiKey = process.env.ROVER_API_KEY;
 
 const client = new Client({
     intents: [
