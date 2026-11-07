@@ -2,12 +2,12 @@
 {
   "1357899763701256253": {
     "verifiedRoleId": "1528618176739414089",
-    "joinChannelId": "입장채널ID",
-    "leaveChannelId": "퇴장채널ID"
+    "joinChannelId": "1566775942062411776",
+    "leaveChannelId": "1566775942062411776"
   },
-  "두번째서버ID": {
-    "verifiedRoleId": "두번째서버인증역할ID",
-    "joinChannelId": "두번째서버입장채널ID",
-    "leaveChannelId": "두번째서버퇴장채널ID"
+  "1380524018192613447": {
+    "verifiedRoleId": "1397918377124696124",
+    "joinChannelId": "1380561548589662280",
+    "leaveChannelId": "1380561548589662280"
   }
 }
