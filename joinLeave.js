@@ -16,7 +16,7 @@ function discordTime(date) {
 }
 
 // ==========================================
-// 서버별 알림 채널 가져오기
+// 서버별 알림 채널
 // ==========================================
 async function getLogChannel(guild, type) {
     const settings = guildConfig[guild.id];
@@ -33,14 +33,22 @@ async function getLogChannel(guild, type) {
         .fetch(channelId)
         .catch(() => null);
 
-    if (!channel?.isTextBased()) return null;
-    if (typeof channel.send !== "function") return null;
+    if (
+        !channel?.isTextBased() ||
+        typeof channel.send !== "function"
+    ) {
+        console.warn(
+            `[${guild.name}] 알림 채널 접근 불가: ${channelId}`
+        );
+        return null;
+    }
 
     return channel;
 }
 
 // ==========================================
-// 사용자 배너 가져오기 (GIF 지원)
+// 사용자 배너 가져오기
+// GIF 지원
 // ==========================================
 async function getUserBanner(user) {
     try {
@@ -50,14 +58,19 @@ async function getUserBanner(user) {
             size: 1024,
             forceStatic: false
         });
+
     } catch (error) {
-        console.warn("배너 조회 실패:", error.message);
+        console.warn(
+            "배너 조회 실패:",
+            error.message
+        );
+
         return null;
     }
 }
 
 // ==========================================
-// 초대 링크 조회
+// 서버 초대 링크 정보 조회
 // ==========================================
 async function fetchInvites(guild) {
     const invites = await guild.invites.fetch();
@@ -67,14 +80,17 @@ async function fetchInvites(guild) {
             invite.code,
             {
                 uses: invite.uses ?? 0,
-                inviterId: invite.inviterId ?? invite.inviter?.id ?? null
+                inviterId:
+                    invite.inviterId ??
+                    invite.inviter?.id ??
+                    null
             }
         ])
     );
 }
 
 // ==========================================
-// 서버별 초대 링크 캐시 초기화
+// 초대 링크 캐시 초기화
 // ==========================================
 async function initializeInvites(guild) {
     if (!guildConfig[guild.id]) return;
@@ -87,7 +103,10 @@ async function initializeInvites(guild) {
         console.log(
             `[${guild.name}] 초대 링크 ${invites.size}개 저장`
         );
+
     } catch (error) {
+        inviteCache.delete(guild.id);
+
         console.warn(
             `[${guild.name}] 초대 링크 조회 실패:`,
             error.message
@@ -96,7 +115,7 @@ async function initializeInvites(guild) {
 }
 
 // ==========================================
-// 메인 기능
+// 멀티 서버 입퇴장 기능
 // ==========================================
 module.exports = function setupJoinLeave(client) {
 
@@ -104,24 +123,27 @@ module.exports = function setupJoinLeave(client) {
     // 봇 시작
     // ======================================
     client.once(Events.ClientReady, async () => {
-        console.log("✅ 멀티 서버 입퇴장 알림 활성화");
+        console.log("✅ 입퇴장 알림 기능 활성화");
 
         for (const guild of client.guilds.cache.values()) {
             const settings = guildConfig[guild.id];
 
             if (!settings) {
                 console.log(
-                    `[${guild.name}] 설정 없음 - 알림 비활성화`
+                    `[${guild.name}] 설정되지 않은 서버`
                 );
                 continue;
             }
 
+            console.log("--------------------------------");
+            console.log(`[${guild.name}] 알림 설정`);
             console.log(
-                `[${guild.name}] 입장 채널: ${settings.joinChannelId || "미설정"}`
+                "입장 채널:",
+                settings.joinChannelId
             );
-
             console.log(
-                `[${guild.name}] 퇴장 채널: ${settings.leaveChannelId || "미설정"}`
+                "퇴장 채널:",
+                settings.leaveChannelId
             );
 
             await initializeInvites(guild);
@@ -129,7 +151,7 @@ module.exports = function setupJoinLeave(client) {
     });
 
     // ======================================
-    // 새로운 서버에 봇이 추가됨
+    // 새로운 서버 추가
     // ======================================
     client.on(Events.GuildCreate, async guild => {
         console.log(
@@ -139,7 +161,9 @@ module.exports = function setupJoinLeave(client) {
         await initializeInvites(guild);
     });
 
-    // 서버에서 봇이 제거됨
+    // ======================================
+    // 서버 제거
+    // ======================================
     client.on(Events.GuildDelete, guild => {
         inviteCache.delete(guild.id);
     });
@@ -149,21 +173,20 @@ module.exports = function setupJoinLeave(client) {
     // ======================================
     client.on(Events.InviteCreate, invite => {
         if (!invite.guild) return;
+        if (!guildConfig[invite.guild.id]) return;
 
-        const guildId = invite.guild.id;
+        // 초기 캐시가 없는 경우에는 비교할
+        // 기준이 없으므로 여기서 만들지 않음
+        const cache = inviteCache.get(invite.guild.id);
 
-        if (!guildConfig[guildId]) return;
-
-        let cache = inviteCache.get(guildId);
-
-        if (!cache) {
-            cache = new Map();
-            inviteCache.set(guildId, cache);
-        }
+        if (!cache) return;
 
         cache.set(invite.code, {
             uses: invite.uses ?? 0,
-            inviterId: invite.inviterId ?? invite.inviter?.id ?? null
+            inviterId:
+                invite.inviterId ??
+                invite.inviter?.id ??
+                null
         });
     });
 
@@ -173,18 +196,17 @@ module.exports = function setupJoinLeave(client) {
     client.on(Events.InviteDelete, invite => {
         if (!invite.guild) return;
 
-        const cache = inviteCache.get(invite.guild.id);
-
-        cache?.delete(invite.code);
+        inviteCache.get(invite.guild.id)
+            ?.delete(invite.code);
     });
 
     // ======================================
     // 멤버 입장
     // ======================================
     client.on(Events.GuildMemberAdd, async member => {
-        try {
-            const guild = member.guild;
+        const guild = member.guild;
 
+        try {
             const channel = await getLogChannel(
                 guild,
                 "join"
@@ -200,14 +222,19 @@ module.exports = function setupJoinLeave(client) {
                 const newInvites = await fetchInvites(guild);
 
                 if (oldInvites) {
-                    const usedInvite = [...newInvites.entries()]
-                        .find(([code, data]) =>
-                            data.uses >
-                            (oldInvites.get(code)?.uses ?? 0)
-                        );
+                    const usedInvites = [
+                        ...newInvites.entries()
+                    ].filter(([code, data]) => {
+                        const previous = oldInvites.get(code);
 
-                    if (usedInvite) {
-                        const inviterId = usedInvite[1].inviterId;
+                        return previous &&
+                            data.uses > previous.uses;
+                    });
+
+                    // 하나만 증가했을 경우 표시
+                    if (usedInvites.length === 1) {
+                        const inviterId =
+                            usedInvites[0][1].inviterId;
 
                         inviterText = inviterId
                             ? `<@${inviterId}>`
@@ -265,6 +292,7 @@ module.exports = function setupJoinLeave(client) {
                 )
                 .setTimestamp();
 
+            // 배너 GIF / 이미지
             if (bannerURL) {
                 embed.setImage(bannerURL);
             }
@@ -277,12 +305,12 @@ module.exports = function setupJoinLeave(client) {
             });
 
             console.log(
-                `[${guild.name}] 입장: ${member.user.username}`
+                `[${guild.name}] ✅ 입장: ${member.user.tag}`
             );
 
         } catch (error) {
             console.error(
-                "입장 알림 오류:",
+                `[${guild.name}] 입장 알림 오류:`,
                 error
             );
         }
@@ -292,9 +320,9 @@ module.exports = function setupJoinLeave(client) {
     // 멤버 퇴장
     // ======================================
     client.on(Events.GuildMemberRemove, async member => {
-        try {
-            const guild = member.guild;
+        const guild = member.guild;
 
+        try {
             const channel = await getLogChannel(
                 guild,
                 "leave"
@@ -347,12 +375,12 @@ module.exports = function setupJoinLeave(client) {
             });
 
             console.log(
-                `[${guild.name}] 퇴장: ${member.user.username}`
+                `[${guild.name}] ✅ 퇴장: ${member.user.tag}`
             );
 
         } catch (error) {
             console.error(
-                "퇴장 알림 오류:",
+                `[${guild.name}] 퇴장 알림 오류:`,
                 error
             );
         }
