@@ -21,29 +21,44 @@ function discordTime(date) {
 async function getLogChannel(guild, type) {
     const settings = guildConfig[guild.id];
 
-    if (!settings) return null;
+    if (!settings) {
+        console.warn(
+            `[${guild.name}] 서버 설정 없음`
+        );
+        return null;
+    }
 
     const channelId = type === "join"
         ? settings.joinChannelId
         : settings.leaveChannelId;
 
-    if (!channelId) return null;
-
-    const channel = await guild.channels
-        .fetch(channelId)
-        .catch(() => null);
-
-    if (
-        !channel?.isTextBased() ||
-        typeof channel.send !== "function"
-    ) {
+    if (!channelId) {
         console.warn(
-            `[${guild.name}] 알림 채널 접근 불가: ${channelId}`
+            `[${guild.name}] ${type} 채널 ID 없음`
         );
         return null;
     }
 
-    return channel;
+    try {
+        const channel = await guild.channels.fetch(channelId);
+
+        if (!channel?.isTextBased() ||
+            typeof channel.send !== "function") {
+            console.warn(
+                `[${guild.name}] 유효하지 않은 채널: ${channelId}`
+            );
+            return null;
+        }
+
+        return channel;
+
+    } catch (error) {
+        console.error(
+            `[${guild.name}] 채널 조회 실패:`,
+            error
+        );
+        return null;
+    }
 }
 
 // ==========================================
@@ -320,8 +335,13 @@ module.exports = function setupJoinLeave(client) {
     // 멤버 퇴장
     // ======================================
     client.on(Events.GuildMemberRemove, async member => {
-        const guild = member.guild;
+    const guild = member.guild;
 
+    console.log(
+        `[${guild.name}] 퇴장 이벤트 감지: ${member.user.tag}`
+    );
+
+    // 기존 try { ... } 코드 유지
         try {
             const channel = await getLogChannel(
                 guild,
