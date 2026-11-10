@@ -220,6 +220,7 @@ module.exports = function setupJoinLeave(client) {
     // ======================================
     client.on(Events.GuildMemberAdd, async member => {
         const guild = member.guild;
+        console.log(`[${guild.name}] 입장 이벤트 감지: ${member.user.tag}`);
 
         try {
             const channel = await getLogChannel(
@@ -336,6 +337,7 @@ module.exports = function setupJoinLeave(client) {
     // ======================================
     client.on(Events.GuildMemberRemove, async member => {
     const guild = member.guild;
+    console.log(`[${guild.name}] 퇴장 이벤트 감지: ${member.user.tag}`);
 
     console.log(
         `[${guild.name}] 퇴장 이벤트 감지: ${member.user.tag}`
